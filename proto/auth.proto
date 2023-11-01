@@ -1,0 +1,78 @@
+syntax = "proto3";
+package backend_api;
+// https://docs.rs/opaque-ke/latest/opaque_ke/
+// Will use opaque-ke for registration and login.
+// From opaque-ke we will get a session token. This token can later be used to create a JWT token for API usage.
+message CreateAccountStartRequest {
+  bytes oprf = 1; // OPAQUE Registration message.
+  string email = 2;
+  string captcha = 3;
+}
+
+message CreateAccountStartResponse {
+  bytes oprf = 1; // OPAQUE Registration message.
+  string session_id = 2;
+}
+
+message CreateAccountFinishRequest {
+  string username = 1;
+  bytes oprf = 2; // OPAQUE Registration message.
+  string session_id = 3;
+  bytes public_signing_key = 4; // The signing key that is used by the server to verify user signatures.
+}
+
+message CreateAccountFinishResponse {
+  string jwt_token = 1;
+}
+
+message AccountLoginStartRequest {
+  string email = 1;
+  bytes oprf = 2; // OPAQUE login message.
+}
+
+message AccountLoginStartResponse {
+  bytes oprf = 1; // OPAQUE login message.
+  string session_id = 2;
+  bool is_totp_code_required = 3;
+}
+
+message AccountLoginFinishRequest {
+  bytes oprf = 1; // OPAQUE login message.
+  string session_id = 2;
+  optional string totp_code = 3;
+}
+
+message AccountLoginFinishResponse {
+  string jwt_token = 1;
+}
+
+
+//-------------TOTP START-------------//
+
+// User sends TOTP Setup request.
+// Server returns users TOTP Secret.
+// User use secret to generate current TOTP code to verify that they have the secret. And sends SetupTotpFinishRequest.
+message SetupTotpStartRequest {
+
+}
+
+message SetupTotpStartResponse {
+  bytes totp_secret = 1; // Sets the totp secrets to enable 2-FA
+}
+
+message SetupTotpFinishRequest {
+  string totp_code = 1; // The code that is generated from TOTP secret.
+}
+
+message SetupTotpFinishResponse {
+
+}
+//-------------TOTP END-------------//
+
+
+// OPAQUE Registration.
+// OPAQUE Login.
+// message OpaqueRegistration {
+//   string username = 1;
+
+// }
